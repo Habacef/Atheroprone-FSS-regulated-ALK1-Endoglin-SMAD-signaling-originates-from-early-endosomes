@@ -1,22 +1,22 @@
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-//			ImageJ script written by Leon Obendorf 				//
-//	Purpose: 									//
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//			ImageJ script written by Leon Obendorf 					//
+//	Purpose: 										//
 //		Perform quantification of caveolin-1 positive circular structures 	 	//
-//		within confocal or immunofluorescence images.			 	//
-//										 	//
+//		within confocal or immunofluorescence images.			 		//
+//										 		//
 // 	Additionally it allows to measure the intensity of a different fluorescent 	 	//
-//	channel within the components. 						 	//
-//	In this study the intensity of a fluorescent AB against Endoglin was measured.	// 
+//	channel within the components. 						 		//
+//	In this study the intensity of a fluorescent AB against Endoglin was measured.		// 
 //	Thethreshhold to calculate the number of caveolin-1 stuctures that are positive 	//
 //	for the second channel (Endoglin, ALK1, EEA1,...) was performed seperately in R. 	//
-//											//
+//												//
 //	The structures were counted as "positive" if the integrated intensity ratio		//
 //	within the area of the caveolin-1 structure was more than 15% above the mean of 	//
-//	the fluorescence intensity in the whole image					//
-//											//
-// 		     Import this script in ImageJ, adjust and simply run it. 		//
-///////////////////////////////////////////////////////////////////////////////////////////////
+//	the fluorescence intensity in the whole image						//
+//												//
+// 		     Import this script in ImageJ, adjust and simply run it. 			//
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // Choose a directory containing subdirectories where in each subdirectory the confocal images are located split into different channels:
