@@ -42,7 +42,7 @@ for (fileName in files)  {
           i=i+1;
           print(i)
           for (Row in 1:nrow(ResultTable)) {
-              if (ResultTable[c(Row),c(7)] > (AverageImageInt[c(i)]+15)) {
+              if (ResultTable[c(Row),c(7)] > (AverageImageInt[c(i)]*1.15)) {
                   posEngNum=posEngNum+1;
               }
               b = (posEngNum / CellList[c(i)]);
