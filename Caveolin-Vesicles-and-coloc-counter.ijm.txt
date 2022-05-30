@@ -121,6 +121,7 @@ function analyzeImage(){
 
 	// find endoglin positives, substract background, measure and see if endoglin is in the Caveolin-1 areas using the measured 
 	// "integrated intensity ratio" with aan adequate cutoff in R (or other plotting script) later on. 
+	// Make sure that the cells are confluent for this whole image based background calculation. Otherwise the background should be calculated slightly different. 
 
 	selectWindow(b + "ch01.tif");
 	run("Subtract Background...", "rolling=50");
