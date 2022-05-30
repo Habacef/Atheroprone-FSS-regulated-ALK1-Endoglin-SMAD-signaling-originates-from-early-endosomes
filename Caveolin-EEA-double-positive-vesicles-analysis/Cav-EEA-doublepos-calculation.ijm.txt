@@ -2,8 +2,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //			ImageJ script written by Leon Obendorf 					                                        //
 //	    Purpose: 										                                                            //
-//		          Perform quantification of caveolin-1 positive circular structures 	           	//
-//		                     within confocal or immunofluorescence images.			 		              //
+//		          Perform quantification of EEA1 & caveolin-1 double positive circular structures 	           	//
+//		                     within confocal or immunofluorescence images. Please also perform the Caveolin-1 quantification with the standard script to allow measurement of Endoglin positivity in caveolin-1 compartments and compare this to EEA1-Cav1 double positive compartments. 		 		              //
 //										 		                                                                      //
 // 	Additionally it allows to measure the intensity of a different fluorescent 	 	              //
 //	channel within the components. 						 		                                              //
