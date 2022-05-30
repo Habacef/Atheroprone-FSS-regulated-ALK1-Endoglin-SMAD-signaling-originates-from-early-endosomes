@@ -1,0 +1,192 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//			ImageJ script written by Leon Obendorf 			    	                                      //
+//	Purpose: 									                                                                  //
+//		Allow to calculate if SMAD is enriched at the Endoglin-positive Caveolin-1.               //
+//		compartments. This script comprises everything needed for analyzing also the	            //
+//		number of Caveolin-1-compartments and the Endoglin intensity.            	                //
+//										 	                                                                        //
+// 	By this, it allows to measure the intensity of a different fluorescent 	 	                  //
+//	channel within the components. 						 	                                                //
+//	In this study the intensity of a fluorescent AB against Endoglin was measured.	            // 
+//	Thethreshhold to calculate the number of caveolin-1 stuctures that are positive 	          //
+//	for the second channel (Endoglin, ALK1, EEA1,...) was performed seperately in R. 	          //
+//											                                                                        //
+//	The structures were counted as Endoglin-"positive" if the integrated intensity ratio	      //
+//	within the area of the caveolin-1 structure was more than 15% above the mean of 	          //
+//	the fluorescence intensity in the whole image. SMAD positivity was determined similarly     //
+//	by first background subtraction and then measuring the intensity of SMAD in the Caveolin-   //
+//  compartments.                                                                               //
+//											                                                                        //
+// 		     Import this script in ImageJ, adjust it and run it. 		                              //
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Choose a directory containing subdirectories where in each subdirectory the confocal images are located split into different channels:
+//
+// DIRECTORY 
+//	|----------- Sub-directory-Image01
+//	|		|----------Image01_ch01.tif
+//	|		|----------Image01_ch02.tif
+//	|		|----------Image01_ch03.tif
+//	|		|----------Image01_ch04.tif
+//	|		
+//	|----------- Subdirectory-Image02
+//	|		|----------Image02_ch01.tif
+//	|		....
+//	.....		
+// 
+// If all color channels are stored within one Image, adjust the following section to fit your data-structure
+
+
+// Iterate over each subfolder
+inputDir = getDirectory("choose the input directory");
+list = getFileList(inputDir);
+var bool = 0;
+for (i=0; i<list.length; i++) {
+
+	folder= inputDir + list[i];
+	
+	ImgList = getFileList(folder);
+	
+	 for (e=0; e<ImgList.length; e++) {
+    	file = folder + ImgList[e];
+		m=".tif"; 
+		a=0;
+		mIndex = indexOf(file,m); 
+		if (mIndex > 0) {
+			open(file);
+			bool=1;
+		}
+		mIndex=0;
+	} 
+	
+	
+	if (bool==1) {
+	analyzeImage();
+	}
+	
+	
+	bool=0;
+
+}
+
+
+function analyzeImage(){ 
+	ImgName=getTitle();
+	// Set how variable u to discriminate the channels by the naming of the images (e.g. ...ch01.tif, ...ch02.tif)
+	u="ch"; 
+	a=0;
+	uIndex = indexOf(ImgName,u); 
+	if (uIndex<0) exit("Error: Directory name does not contain "+u); 
+	a=substring (ImgName,uIndex); 
+	b=substring(ImgName, 0, uIndex);
+	print(b);
+
+
+    print("\\Clear");
+	// get the number cells within one image via counting nuclei and deleting these ROIs afterwards!
+	 selectWindow(b + "ch00.tif");
+	 run("Convert to Mask");
+	 run("Dilate"); 
+	 run("Fill Holes"); 
+	 run("Analyze Particles...", "size=30.00-Infinity exclude add in_situ");
+	 nROIs = roiManager("count");
+	 print("\\Clear");
+
+	print(nROIs);
+    roiManager("deselect");
+	roiManager("delete");
+
+
+	// select channel of caveolin-1 to find all ring-like-structures 
+	// adjust to your specific channel that contains the fluorescence of the circular particles.
+	selectWindow(b + "ch03.tif");
+
+	run("Subtract Background...", "rolling=4");
+
+	// setAutoThreshold("Minimum dark no-reset");
+	// Autotreshhold "Minimum dark no-reset" does not work for all kind of images 
+	// -> eventually set threshhold manually so that rings are still visible but barely more. 
+	setThreshold(70, 255);
+
+
+	setOption("BlackBackground", true);
+	run("Convert to Mask");
+	// run("Watershed");
+	// depending on how your resolution is and in which scaling the images are loaded (pixel or nanometer) adjust the size for "analyze particles" 
+	run("Analyze Particles...", "size=0.6-4.00 exclude add in_situ circularity=0.5-1.00");
+
+	//print the count in ROI manager.
+	dir=getDirectory("image");
+	name = "" + b +".txt"; 
+	nROIs = roiManager("count");
+	print(nROIs);
+
+	//find SMAD1 positives after background subtraction. -> Where still intensity is left after converting to mask, the regions are counted as positive for SMAD1.  
+
+
+	selectWindow(b + "ch01.tif");
+	run("Subtract Background...", "rolling=50");
+	setAutoThreshold("Yen dark no-reset");
+	setOption("BlackBackground", true);
+	run("Convert to Mask");
+	run("Clear Results"); 
+	roiManager("deselect");
+	roiManager("measure");
+
+	//save results of measurement for each caveolin-vesicle
+	if (isOpen("Results")) { 
+       		selectWindow("Results");
+       		roiManager("Select", 0);
+   	   	dir=getDirectory("image");
+   	   	name = b +".txt"; // can change to xls, csv, etc.
+       		saveAs("results", dir+name); 
+  
+	}
+	// find Endoglin positives, subtract background, measure and see if Endoglin is in the Caveolin-1 areas using the measured 
+	// "integrated intensity ratio" with an adequate cutoff in R (or other plotting script) later on. 
+
+	selectWindow(b + "ch02.tif");
+	run("Subtract Background...", "rolling=50");
+	run("Subtract Background...", "rolling=20");
+	getValue("Mean")
+	run("Clear Results"); 
+	roiManager("deselect");
+	roiManager("measure");
+
+	//save results of measurement for each caveolin-vesicle
+	if (isOpen("Results")) { 
+       		selectWindow("Results");
+       		roiManager("Select", 0);
+   	   	dir=getDirectory("image");
+   	   	name = "ENG.txt"; // can change to xls, csv, etc.
+       		saveAs("results", dir+name); 
+  
+	}
+
+
+	//save 3 extra values: number of nuclei, number of Caveolin-1-positive rings and mean intensity of Endoglin / ALK1 / ... within the whole image
+	selectWindow("Log");  
+	name = "NucleiCavCountENGInt_" +  b +".txt"; //can change to xls, csv, etc.
+	saveAs("results", dir+name); 
+	saveAs("Text", dir+name); 
+
+	//clear ROI manager, results, log and close all open windows:
+	roiManager("deselect");
+	roiManager("delete");
+	print("\\Clear");
+	//selectWindow(b+ "=2");
+	//close();
+	selectWindow(b+ "ch01.tif");
+	close();
+
+	selectWindow(b+ "ch03.tif");
+	close();
+	selectWindow(b+ "ch00.tif");
+	close();
+	selectWindow(b+ "ch02.tif");
+	close();
+	//run("Clear Results");
+	
+}
